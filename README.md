@@ -6,7 +6,7 @@ A browser-based networking utility I built to apply and strengthen my understand
 of IP addressing, subnetting, and network protocols.
 
 ## Live Demo
-https://balkiratsinghkaloya.github.io/netcalc/
+https://balkiratsinghkaloya.github.io/netclac/
 
 ## Features
 
