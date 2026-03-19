@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetCalc — Subnet Calculator & Network Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: #d4d2c9;
+  --border2: #b8b5aa;
+  --text: #1a1917;
+  --text2: #5c5a54;
+  --text3: #9c9a92;
+  --accent: #1a56db;
+  --accent-bg: #eff4ff;
+  --green: #0f7b4a;
+  --green-bg: #ecfdf3;
+  --red: #c0392b;
+  --red-bg: #fff0ee;
+  --amber: #92400e;
+  --amber-bg: #fffbeb;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  background: var(--text);
+  color: #fff;
+  padding: 0 32px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.header-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 12px;
+  color: #aaa;
+  font-family: var(--mono);
+}
+
+.header-links a { color: #ccc; text-decoration: none; }
+.header-links a:hover { color: #fff; }
+
+/* ── Tabs ── */
+.tab-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  gap: 0;
+}
+
+.tab {
+  padding: 12px 20px;
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tab:hover { color: var(--text); background: var(--surface2); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+/* ── Layout ── */
+main { max-width: 1100px; margin: 0 auto; padding: 28px 32px; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.page-desc {
+  color: var(--text2);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.card-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-body { padding: 20px; }
+
+/* ── Forms ── */
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 12px; font-weight: 500; color: var(--text2); font-family: var(--mono); }
+
+input[type="text"],
+input[type="number"],
+select {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  height: 36px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,86,219,0.12); }
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0 18px;
+  height: 36px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn:hover { background: #1447c4; }
+.btn:active { transform: scale(0.98); }
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border2);
+}
+
+.btn-secondary:hover { background: var(--border); }
+
+.btn-danger { background: var(--red); }
+.btn-danger:hover { background: #a93226; }
+
+/* ── Result Table ── */
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.result-row {
+  display: contents;
+}
+
+.result-label {
+  background: var(--surface2);
+  padding: 9px 14px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.result-value {
+  background: var(--surface);
+  padding: 9px 14px;
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text);
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.result-value.green { color: var(--green); }
+.result-value.red   { color: var(--red); }
+.result-value.blue  { color: var(--accent); }
+.result-value.amber { color: var(--amber); }
+
+/* ── Binary display ── */
+.binary-row {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bin-label { color: var(--text2); font-size: 11px; min-width: 100px; }
+.bin-val   { color: var(--text); letter-spacing: 0.5px; }
+.bin-net   { color: var(--green); }
+.bin-host  { color: var(--red); }
+
+/* ── Info badge ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.badge-green  { background: var(--green-bg); color: var(--green); border: 1px solid rgba(15,123,74,0.2); }
+.badge-red    { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(192,57,43,0.2); }
+.badge-blue   { background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(26,86,219,0.2); }
+.badge-amber  { background: var(--amber-bg); color: var(--amber);  border: 1px solid rgba(146,64,14,0.2); }
+.badge-gray   { background: var(--surface2); color: var(--text2);  border: 1px solid var(--border); }
+
+/* ── VLSM Table ── */
+.vlsm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.vlsm-table th {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.vlsm-table td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  color: var(--text);
+}
+
+.vlsm-table tr:hover td { background: var(--surface2); }
+.vlsm-table tr:nth-child(even) td { background: rgba(0,0,0,0.012); }
+
+/* ── Protocol reference ── */
+.proto-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.proto-table th {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.proto-table td {
+  border: 1px solid var(--border);
+  padding: 9px 14px;
+  color: var(--text);
+  vertical-align: top;
+}
+
+.proto-table tr:hover td { background: var(--surface2); }
+
+.port-num {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+/* ── Ping tool ── */
+#ping-output {
+  background: #1a1917;
+  color: #a8ff78;
+  font-family: var(--mono);
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 14px 16px;
+  min-height: 160px;
+  max-height: 280px;
+  overflow-y: auto;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+#ping-output .dim   { color: #555; }
+#ping-output .warn  { color: #ffab00; }
+#ping-output .err   { color: #ff4757; }
+#ping-output .good  { color: #a8ff78; }
+#ping-output .info  { color: #74c7ec; }
+
+/* ── IP class indicator ── */
+.class-cards {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.class-card {
+  flex: 1;
+  min-width: 100px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 12px;
+  text-align: center;
+  background: var(--surface2);
+  transition: all 0.15s;
+}
+
+.class-card.active-class {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.class-name {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+
+.class-card.active-class .class-name { color: var(--accent); }
+.class-range { font-size: 11px; font-family: var(--mono); color: var(--text3); }
+
+/* ── CIDR slider ── */
+.cidr-slider { width: 100%; accent-color: var(--accent); height: 4px; }
+
+/* ── Alert box ── */
+.alert {
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: var(--mono);
+  margin-bottom: 12px;
+  border: 1px solid;
+}
+
+.alert-err  { background: var(--red-bg);   border-color: rgba(192,57,43,0.3); color: var(--red); }
+.alert-info { background: var(--accent-bg); border-color: rgba(26,86,219,0.3); color: var(--accent); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text3);
+  background: var(--surface);
+  margin-top: 20px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 680px) {
+  main { padding: 18px 16px; }
+  header { padding: 0 16px; }
+  .tab-bar { padding: 0 4px; overflow-x: auto; }
+  .result-grid { grid-template-columns: 1fr; }
+  .form-row { flex-direction: column; }
+  .header-links { display: none; }
+}
+
+.section-gap { margin-bottom: 24px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+.note {
+  font-size: 12px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-top: 8px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* VLSM add-row section */
+.subnet-req-list { margin-bottom: 12px; }
+.subnet-req-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.subnet-req-row input { width: 110px; }
+.subnet-req-row .req-label {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text2);
+  min-width: 80px;
+}
+.remove-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 14px;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+  transition: background 0.12s;
+}
+.remove-btn:hover { background: var(--red-bg); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    NetCalc
+    <span class="logo-badge">v1.0</span>
+    <span style="font-weight:400;color:#888;font-size:12px">— Network Subnet Calculator</span>
+  </div>
+  <div class="header-links">
+    <span>Made by: Networking Student</span>
+    <a href="https://github.com" target="_blank">GitHub ↗</a>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('subnet')">Subnet Calculator</div>
+  <div class="tab" onclick="switchTab('vlsm')">VLSM Planner</div>
+  <div class="tab" onclick="switchTab('ping')">Ping Simulator</div>
+  <div class="tab" onclick="switchTab('ports')">Port Reference</div>
+  <div class="tab" onclick="switchTab('about')">About</div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 1 — SUBNET CALCULATOR
+════════════════════════════════════ -->
+<main>
+<div id="tab-subnet" class="tab-content active">
+  <div class="page-title">Subnet Calculator</div>
+  <div class="page-desc">Enter an IP address and prefix length (CIDR) to calculate all subnet parameters.</div>
+
+  <div class="card section-gap">
+    <div class="card-header">Input</div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>IP Address</label>
+          <input type="text" id="ip-input" value="192.168.10.0" placeholder="e.g. 10.0.0.0" style="width:160px" />
+        </div>
+        <div class="form-group">
+          <label>Prefix / CIDR</label>
+          <input type="number" id="cidr-input" value="24" min="1" max="32" style="width:80px" />
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>Slide CIDR: <span id="cidr-display" style="color:var(--accent)">/24</span></label>
+          <input type="range" class="cidr-slider" id="cidr-slider" min="1" max="32" value="24" />
+        </div>
+        <button class="btn" onclick="calculate()">Calculate</button>
+        <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+      </div>
+
+      <div id="ip-error" style="display:none" class="alert alert-err">⚠ Invalid IP address format. Use dotted-decimal notation (e.g. 192.168.1.0)</div>
+
+      <!-- IP Class indicator -->
+      <div class="class-cards" id="class-cards">
+        <div class="class-card" id="cls-A"><div class="class-name">A</div><div class="class-range">1.0.0.0 – 126.x</div></div>
+        <div class="class-card" id="cls-B"><div class="class-name">B</div><div class="class-range">128.0 – 191.255</div></div>
+        <div class="class-card" id="cls-C"><div class="class-name">C</div><div class="class-range">192.168 – 223.x</div></div>
+        <div class="class-card" id="cls-D"><div class="class-name">D</div><div class="class-range">224.x – 239.x (Multicast)</div></div>
+        <div class="class-card" id="cls-E"><div class="class-name">E</div><div class="class-range">240.x+ (Reserved)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="results-section" style="display:none">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">Network Information</div>
+        <div class="card-body" style="padding:0">
+          <div class="result-grid">
+            <div class="result-row">
+              <div class="result-label">IP Address</div>
+              <div class="result-value blue" id="r-ip">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">Network Address</div>
+              <div class="result-value green" id="r-net">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">Subnet Mask</div>
+              <div class="result-value" id="r-mask">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">Wildcard Mask</div>
+              <div class="result-value" id="r-wild">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">Broadcast Address</div>
+              <div class="result-value red" id="r-bcast">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">First Usable Host</div>
+              <div class="result-value" id="r-first">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">Last Usable Host</div>
+              <div class="result-value" id="r-last">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">Usable Hosts</div>
+              <div class="result-value green" id="r-hosts">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">Total Addresses</div>
+              <div class="result-value" id="r-total">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">CIDR Notation</div>
+              <div class="result-value blue" id="r-cidr">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">IP Class</div>
+              <div class="result-value amber" id="r-class">—</div>
+            </div>
+            <div class="result-row">
+              <div class="result-label">IP Type</div>
+              <div class="result-value" id="r-type">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Binary Representation</div>
+        <div class="card-body">
+          <p class="note" style="margin-bottom:12px">Network bits shown in <span style="color:var(--green)">green</span>, host bits in <span style="color:var(--red)">red</span></p>
+          <div id="binary-display"></div>
+          <div class="divider"></div>
+          <div class="card-header" style="margin: 0 -20px;padding:10px 20px;font-size:11px">Subnetting Info</div>
+          <div style="margin-top:14px" class="result-grid" id="subnet-extra"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 2 — VLSM PLANNER
+════════════════════════════════════ -->
+<div id="tab-vlsm" class="tab-content">
+  <div class="page-title">VLSM Subnet Planner</div>
+  <div class="page-desc">Variable Length Subnet Masking — divide a network into subnets of different sizes. Enter your base network and required hosts per subnet.</div>
+
+  <div class="card section-gap">
+    <div class="card-header">Base Network</div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Network Address</label>
+          <input type="text" id="vlsm-net" value="192.168.1.0" style="width:160px" />
+        </div>
+        <div class="form-group">
+          <label>CIDR Prefix</label>
+          <input type="number" id="vlsm-cidr" value="24" min="1" max="30" style="width:80px" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card section-gap">
+    <div class="card-header">
+      Subnet Requirements
+      <button class="btn btn-secondary" style="font-size:11px;height:28px;padding:0 12px" onclick="addSubnetRow()">+ Add Subnet</button>
+    </div>
+    <div class="card-body">
+      <div class="subnet-req-list" id="subnet-req-list">
+        <!-- rows added by JS -->
+      </div>
+      <button class="btn" onclick="runVLSM()">Generate VLSM Plan</button>
+    </div>
+  </div>
+
+  <div id="vlsm-results" style="display:none">
+    <div class="card">
+      <div class="card-header">VLSM Allocation Table <span id="vlsm-summary" style="font-weight:400;color:var(--text3)"></span></div>
+      <div class="card-body" style="padding:0 0 0 0;overflow-x:auto">
+        <table class="vlsm-table" id="vlsm-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Subnet Name</th>
+              <th>Hosts Needed</th>
+              <th>Hosts Allocated</th>
+              <th>Network Address</th>
+              <th>Subnet Mask</th>
+              <th>First Host</th>
+              <th>Last Host</th>
+              <th>Broadcast</th>
+              <th>CIDR</th>
+            </tr>
+          </thead>
+          <tbody id="vlsm-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note" style="margin-top:8px">* VLSM allocates largest subnets first to minimize wasted address space.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 3 — PING SIMULATOR
+════════════════════════════════════ -->
+<div id="tab-ping" class="tab-content">
+  <div class="page-title">Ping / Traceroute Simulator</div>
+  <div class="page-desc">Simulates ICMP ping and traceroute output. Demonstrates understanding of ICMP protocol, TTL, RTT, and packet loss.</div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">Ping</div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group" style="flex:1">
+            <label>Target Host / IP</label>
+            <input type="text" id="ping-target" value="8.8.8.8" />
+          </div>
+          <div class="form-group">
+            <label>Count</label>
+            <input type="number" id="ping-count" value="4" min="1" max="10" style="width:70px" />
+          </div>
+          <div class="form-group">
+            <label>Packet Size (bytes)</label>
+            <input type="number" id="ping-size" value="64" min="32" max="1472" style="width:90px" />
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="btn" onclick="runPing()">▶ Ping</button>
+          <button class="btn btn-secondary" onclick="clearPing()">Clear</button>
+        </div>
+        <div id="ping-output"><span class="dim">// Output will appear here</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Traceroute</div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group" style="flex:1">
+            <label>Target Host / IP</label>
+            <input type="text" id="trace-target" value="google.com" />
+          </div>
+          <div class="form-group">
+            <label>Max Hops</label>
+            <input type="number" id="trace-hops" value="15" min="5" max="30" style="width:70px" />
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="btn" onclick="runTrace()">▶ Traceroute</button>
+          <button class="btn btn-secondary" onclick="clearTrace()">Clear</button>
+        </div>
+        <div id="trace-output" style="background:#1a1917;color:#a8ff78;font-family:var(--mono);font-size:12px;border-radius:4px;padding:14px 16px;min-height:160px;max-height:280px;overflow-y:auto;line-height:1.9;white-space:pre-wrap"><span style="color:#555">// Output will appear here</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">ICMP — How Ping Works</div>
+    <div class="card-body">
+      <p style="color:var(--text2);font-size:13px;line-height:1.8;margin-bottom:12px">
+        <strong>ping</strong> uses <strong>ICMP (Internet Control Message Protocol)</strong> — a Layer 3 protocol defined in RFC 792. It sends Echo Request packets (type 8) and waits for Echo Reply packets (type 0). The round-trip time (RTT) is measured in milliseconds.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="badge badge-blue">ICMP Type 8 → Echo Request</span>
+        <span class="badge badge-green">ICMP Type 0 → Echo Reply</span>
+        <span class="badge badge-amber">TTL = Time to Live (hops)</span>
+        <span class="badge badge-gray">RFC 792</span>
+        <span class="badge badge-gray">Layer 3 — Network</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 4 — PORT REFERENCE
+════════════════════════════════════ -->
+<div id="tab-ports" class="tab-content">
+  <div class="page-title">Port & Protocol Reference</div>
+  <div class="page-desc">Common TCP/UDP ports with protocol details. Useful during network scanning and firewall rule configuration.</div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-body" style="padding:12px 16px">
+      <div class="form-row" style="margin:0">
+        <div class="form-group" style="flex:1">
+          <input type="text" id="port-search" placeholder="Search port number or protocol name..." oninput="filterPorts()" style="width:100%" />
+        </div>
+        <div class="form-group">
+          <select id="proto-type-filter" onchange="filterPorts()" style="width:100px">
+            <option value="">All</option>
+            <option value="TCP">TCP</option>
+            <option value="UDP">UDP</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <select id="risk-filter" onchange="filterPorts()" style="width:120px">
+            <option value="">All Risk</option>
+            <option value="High">High Risk</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Well-Known Ports (0 – 1023) & Registered Ports</div>
+    <div style="overflow-x:auto">
+      <table class="proto-table" id="ports-table">
+        <thead>
+          <tr>
+            <th>Port</th>
+            <th>Protocol</th>
+            <th>Transport</th>
+            <th>Layer</th>
+            <th>Description</th>
+            <th>Risk</th>
+          </tr>
+        </thead>
+        <tbody id="ports-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 5 — ABOUT
+════════════════════════════════════ -->
+<div id="tab-about" class="tab-content">
+  <div class="page-title">About This Project</div>
+  <div class="page-desc">NetCalc — A networking utility tool built as a personal learning project.</div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">Project Overview</div>
+      <div class="card-body">
+        <p style="color:var(--text2);font-size:13px;line-height:1.9;margin-bottom:16px">
+          NetCalc is a browser-based networking utility I built to strengthen my understanding of IP addressing, subnetting, and network protocols. Rather than just reading theory, I wanted to implement these concepts in working code.
+        </p>
+        <p style="color:var(--text2);font-size:13px;line-height:1.9;margin-bottom:16px">
+          The project covers topics from my networking coursework including IPv4 addressing, CIDR notation, subnet masking, VLSM design, ICMP, and common TCP/UDP ports — all implemented from scratch using pure JavaScript without any libraries.
+        </p>
+        <p style="color:var(--text2);font-size:13px;line-height:1.9">
+          I use this tool regularly when practicing subnetting problems and during lab exercises.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Concepts Covered</div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span class="badge badge-blue" style="margin-top:2px">IPv4</span>
+            <span style="font-size:13px;color:var(--text2)">Dotted-decimal notation, binary conversion, octet structure</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span class="badge badge-green" style="margin-top:2px">CIDR</span>
+            <span style="font-size:13px;color:var(--text2)">Classless Inter-Domain Routing, prefix length, supernetting</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span class="badge badge-amber" style="margin-top:2px">Subnetting</span>
+            <span style="font-size:13px;color:var(--text2)">Network/broadcast address, host range, wildcard masks</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span class="badge badge-blue" style="margin-top:2px">VLSM</span>
+            <span style="font-size:13px;color:var(--text2)">Variable Length Subnet Masking, efficient address allocation</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span class="badge badge-gray" style="margin-top:2px">ICMP</span>
+            <span style="font-size:13px;color:var(--text2)">Ping (Echo Request/Reply), TTL, RTT, packet loss</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span class="badge badge-gray" style="margin-top:2px">Ports</span>
+            <span style="font-size:13px;color:var(--text2)">TCP/UDP well-known ports, protocol layers, risk classification</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">Tech Stack</div>
+    <div class="card-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="badge badge-gray">HTML5</span>
+        <span class="badge badge-gray">CSS3</span>
+        <span class="badge badge-gray">Vanilla JavaScript</span>
+        <span class="badge badge-gray">No libraries / frameworks</span>
+        <span class="badge badge-gray">Bitwise IP operations</span>
+        <span class="badge badge-blue">GitHub Pages hosted</span>
+      </div>
+      <p class="note" style="margin-top:12px">All subnet math is done using JavaScript bitwise operators (>>>, &amp;, |, ~) — the same operations a real subnet calculator uses internally.</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <span>NetCalc v1.0 — Networking Student Project</span>
+  <span>All calculations use bitwise IPv4 operations &nbsp;|&nbsp; Educational use</span>
+</footer>
+
+<!-- ══════════ JAVASCRIPT ══════════ -->
+<script>
+// ─── Tab switching ───
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ─── Slider sync ───
+const slider = document.getElementById('cidr-slider');
+const cidrIn = document.getElementById('cidr-input');
+const cidrDisp = document.getElementById('cidr-display');
+
+slider.addEventListener('input', () => {
+  cidrIn.value = slider.value;
+  cidrDisp.textContent = '/' + slider.value;
+});
+cidrIn.addEventListener('input', () => {
+  const v = Math.max(1, Math.min(32, parseInt(cidrIn.value) || 24));
+  slider.value = v;
+  cidrDisp.textContent = '/' + v;
+});
+
+// ─── IP utilities ───
+function parseIP(str) {
+  const parts = str.trim().split('.');
+  if (parts.length !== 4) return null;
+  const nums = parts.map(p => parseInt(p, 10));
+  if (nums.some(n => isNaN(n) || n < 0 || n > 255)) return null;
+  return ((nums[0] << 24) | (nums[1] << 16) | (nums[2] << 8) | nums[3]) >>> 0;
+}
+
+function ipToStr(n) {
+  return [
+    (n >>> 24) & 0xFF,
+    (n >>> 16) & 0xFF,
+    (n >>> 8)  & 0xFF,
+    n          & 0xFF
+  ].join('.');
+}
+
+function cidrToMask(cidr) {
+  if (cidr === 0) return 0;
+  return (0xFFFFFFFF << (32 - cidr)) >>> 0;
+}
+
+function toBin8(n) { return n.toString(2).padStart(8, '0'); }
+
+function ipToBin(ip) {
+  return [
+    (ip >>> 24) & 0xFF,
+    (ip >>> 16) & 0xFF,
+    (ip >>> 8)  & 0xFF,
+    ip          & 0xFF
+  ].map(toBin8).join('.');
+}
+
+function getIPClass(firstOctet) {
+  if (firstOctet === 127)                         return { cls:'Loopback', id:'lo' };
+  if (firstOctet >= 1   && firstOctet <= 126)     return { cls:'A', id:'A' };
+  if (firstOctet >= 128 && firstOctet <= 191)     return { cls:'B', id:'B' };
+  if (firstOctet >= 192 && firstOctet <= 223)     return { cls:'C', id:'C' };
+  if (firstOctet >= 224 && firstOctet <= 239)     return { cls:'D (Multicast)', id:'D' };
+  if (firstOctet >= 240)                          return { cls:'E (Reserved)', id:'E' };
+  return { cls:'Unknown', id:'' };
+}
+
+function isPrivate(ip) {
+  const a = (ip >>> 24) & 0xFF;
+  const b = (ip >>> 16) & 0xFF;
+  if (a === 10) return '10.x.x.x (Class A Private)';
+  if (a === 172 && b >= 16 && b <= 31) return '172.16-31.x.x (Class B Private)';
+  if (a === 192 && b === 168) return '192.168.x.x (Class C Private)';
+  if (a === 169 && b === 254) return '169.254.x.x (APIPA / Link-local)';
+  if (a === 127) return '127.x.x.x (Loopback)';
+  return 'Public';
+}
+
+// ─── Subnet Calculator ───
+function calculate() {
+  const ipStr = document.getElementById('ip-input').value.trim();
+  const cidr  = parseInt(document.getElementById('cidr-input').value, 10);
+  const errEl = document.getElementById('ip-error');
+
+  const ip = parseIP(ipStr);
+  if (!ip && ipStr) { errEl.style.display = 'block'; document.getElementById('results-section').style.display='none'; return; }
+  errEl.style.display = 'none';
+
+  if (isNaN(cidr) || cidr < 1 || cidr > 32) return;
+
+  const mask      = cidrToMask(cidr);
+  const wildcard  = (~mask) >>> 0;
+  const network   = (ip & mask) >>> 0;
+  const broadcast = (network | wildcard) >>> 0;
+  const first     = cidr >= 31 ? network   : (network + 1) >>> 0;
+  const last      = cidr >= 31 ? broadcast : (broadcast - 1) >>> 0;
+  const total     = Math.pow(2, 32 - cidr);
+  const usable    = cidr >= 31 ? total : Math.max(0, total - 2);
+
+  // Class
+  const firstOctet = (ip >>> 24) & 0xFF;
+  const classInfo  = getIPClass(firstOctet);
+  const ipType     = isPrivate(ip);
+
+  // Update class cards
+  ['A','B','C','D','E'].forEach(c => {
+    document.getElementById('cls-' + c).classList.remove('active-class');
+  });
+  if (classInfo.id && ['A','B','C','D','E'].includes(classInfo.id)) {
+    document.getElementById('cls-' + classInfo.id).classList.add('active-class');
+  }
+
+  // Fill results
+  set('r-ip',    ipToStr(ip));
+  set('r-net',   ipToStr(network));
+  set('r-mask',  ipToStr(mask));
+  set('r-wild',  ipToStr(wildcard));
+  set('r-bcast', ipToStr(broadcast));
+  set('r-first', ipToStr(first));
+  set('r-last',  ipToStr(last));
+  set('r-hosts', usable.toLocaleString());
+  set('r-total', total.toLocaleString());
+  set('r-cidr',  ipToStr(network) + '/' + cidr);
+  set('r-class', classInfo.cls);
+  set('r-type',  ipType);
+
+  // Binary display
+  function coloredBin(ipNum, cidrLen) {
+    const full = ipToBin(ipNum).replace(/\./g, '');
+    const octets = full.match(/.{8}/g);
+    let pos = 0;
+    return octets.map((oct, oi) => {
+      let out = '';
+      for (let b = 0; b < 8; b++, pos++) {
+        const isNet = pos < cidrLen;
+        out += `<span class="${isNet ? 'bin-net' : 'bin-host'}">${oct[b]}</span>`;
+      }
+      return out;
+    }).join('<span style="color:var(--border2)">.</span>');
+  }
+
+  const binDiv = document.getElementById('binary-display');
+  const rows = [
+    { label: 'IP Address',   val: ipNum2binColored(ip,   cidr) },
+    { label: 'Subnet Mask',  val: ipNum2binColored(mask, cidr, true) },
+    { label: 'Network Addr', val: ipNum2binColored(network, cidr) },
+    { label: 'Broadcast',    val: ipNum2binColored(broadcast, cidr) },
+  ];
+  binDiv.innerHTML = rows.map(r => `
+    <div class="binary-row">
+      <span class="bin-label">${r.label}</span>
+      <span class="bin-val" style="font-size:12px;letter-spacing:0.3px">${r.val}</span>
+    </div>`).join('');
+
+  // Subnet extra
+  const subnetBits = cidr - (
+    firstOctet >= 1 && firstOctet <= 126 ? 8 :
+    firstOctet >= 128 && firstOctet <= 191 ? 16 : 24
+  );
+  const numSubnets = subnetBits >= 0 ? Math.pow(2, subnetBits) : '—';
+
+  document.getElementById('subnet-extra').innerHTML = `
+    <div class="result-row"><div class="result-label">Prefix Length</div><div class="result-value">/${cidr}</div></div>
+    <div class="result-row"><div class="result-label">Network Bits</div><div class="result-value green">${cidr}</div></div>
+    <div class="result-row"><div class="result-label">Host Bits</div><div class="result-value red">${32 - cidr}</div></div>
+    <div class="result-row"><div class="result-label">Subnets possible</div><div class="result-value">${typeof numSubnets === 'number' ? numSubnets.toLocaleString() : numSubnets}</div></div>`;
+
+  document.getElementById('results-section').style.display = 'block';
+}
+
+function ipNum2binColored(ipNum, cidr, isMask) {
+  const full = ipToBin(ipNum).replace(/\./g, '');
+  const octets = full.match(/.{8}/g);
+  let pos = 0;
+  return octets.map((oct) => {
+    let out = '';
+    for (let b = 0; b < 8; b++, pos++) {
+      const isNet = pos < cidr;
+      const color = isMask ? (isNet ? 'var(--green)' : 'var(--red)') : (isNet ? 'var(--green)' : 'var(--red)');
+      out += `<span style="color:${color}">${oct[b]}</span>`;
+    }
+    return out;
+  }).join('<span style="color:var(--border2)">.</span>');
+}
+
+function set(id, val) { document.getElementById(id).textContent = val; }
+
+function resetForm() {
+  document.getElementById('ip-input').value = '192.168.10.0';
+  document.getElementById('cidr-input').value = 24;
+  slider.value = 24;
+  cidrDisp.textContent = '/24';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('ip-error').style.display = 'none';
+  ['A','B','C','D','E'].forEach(c => document.getElementById('cls-' + c).classList.remove('active-class'));
+}
+
+// Auto-calc on load
+calculate();
+
+// ─── VLSM ───
+let subnetRows = [];
+let rowCounter = 0;
+
+function addSubnetRow(name, hosts) {
+  rowCounter++;
+  const id = rowCounter;
+  subnetRows.push(id);
+  const list = document.getElementById('subnet-req-list');
+  const div = document.createElement('div');
+  div.className = 'subnet-req-row';
+  div.id = 'srow-' + id;
+  div.innerHTML = `
+    <span class="req-label">Subnet ${id}</span>
+    <input type="text" placeholder="Name (e.g. LAN-A)" value="${name || 'Subnet-' + id}" id="sname-${id}" style="width:120px" />
+    <input type="number" placeholder="Hosts needed" value="${hosts || ''}" id="shosts-${id}" min="1" max="16777214" style="width:120px" />
+    <button class="remove-btn" onclick="removeRow(${id})">×</button>`;
+  list.appendChild(div);
+}
+
+function removeRow(id) {
+  const el = document.getElementById('srow-' + id);
+  if (el) el.remove();
+  subnetRows = subnetRows.filter(r => r !== id);
+}
+
+// Seed default rows
+addSubnetRow('HQ-LAN', 100);
+addSubnetRow('Branch-A', 50);
+addSubnetRow('Branch-B', 25);
+addSubnetRow('WAN-Link', 2);
+
+function runVLSM() {
+  const baseNet = document.getElementById('vlsm-net').value.trim();
+  const baseCidr = parseInt(document.getElementById('vlsm-cidr').value, 10);
+
+  const baseIP = parseIP(baseNet);
+  if (!baseIP) { alert('Invalid base network address'); return; }
+
+  // Collect requirements
+  let reqs = [];
+  for (const id of subnetRows) {
+    const el = document.getElementById('srow-' + id);
+    if (!el) continue;
+    const name  = document.getElementById('sname-' + id).value || 'Subnet-' + id;
+    const hosts = parseInt(document.getElementById('shosts-' + id).value, 10);
+    if (!isNaN(hosts) && hosts > 0) reqs.push({ name, hosts });
+  }
+
+  if (reqs.length === 0) { alert('Add at least one subnet requirement.'); return; }
+
+  // Sort largest first
+  reqs.sort((a, b) => b.hosts - a.hosts);
+
+  let currentIP = (baseIP & cidrToMask(baseCidr)) >>> 0;
+  const endIP   = (currentIP | (~cidrToMask(baseCidr) >>> 0)) >>> 0;
+
+  const tbody = document.getElementById('vlsm-tbody');
+  tbody.innerHTML = '';
+  let allFit = true;
+
+  reqs.forEach((req, i) => {
+    const bitsNeeded = Math.ceil(Math.log2(req.hosts + 2));
+    const prefix = 32 - bitsNeeded;
+    const mask   = cidrToMask(prefix);
+    const wild   = (~mask) >>> 0;
+    const netAddr    = currentIP;
+    const broadcast  = (netAddr | wild) >>> 0;
+    const firstHost  = (netAddr + 1) >>> 0;
+    const lastHost   = (broadcast - 1) >>> 0;
+    const allocated  = Math.pow(2, bitsNeeded) - 2;
+
+    const fits = broadcast <= endIP;
+    if (!fits) allFit = false;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text2);text-align:center">${i + 1}</td>
+      <td style="font-weight:500">${req.name}</td>
+      <td style="text-align:right;color:var(--text2)">${req.hosts}</td>
+      <td style="text-align:right;color:var(--green);font-weight:500">${allocated}</td>
+      <td style="color:var(--accent)">${ipToStr(netAddr)}</td>
+      <td>${ipToStr(mask)}</td>
+      <td>${ipToStr(firstHost)}</td>
+      <td>${ipToStr(lastHost)}</td>
+      <td style="color:var(--red)">${ipToStr(broadcast)}</td>
+      <td style="font-weight:600">/${prefix}</td>`;
+    if (!fits) tr.style.background = 'rgba(192,57,43,0.07)';
+    tbody.appendChild(tr);
+
+    currentIP = (broadcast + 1) >>> 0;
+  });
+
+  const used = currentIP - ((baseIP & cidrToMask(baseCidr)) >>> 0);
+  const total = Math.pow(2, 32 - baseCidr);
+  document.getElementById('vlsm-summary').textContent =
+    ` — ${reqs.length} subnets | ${used}/${total} addresses used | ${total - used} remaining`;
+
+  document.getElementById('vlsm-results').style.display = 'block';
+}
+
+// ─── Ping simulator ───
+let pinging = false;
+
+function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function randFloat(a, b) { return (Math.random() * (b - a) + a).toFixed(3); }
+
+async function runPing() {
+  if (pinging) return;
+  pinging = true;
+  const target = document.getElementById('ping-target').value.trim() || '8.8.8.8';
+  const count  = Math.min(10, parseInt(document.getElementById('ping-count').value) || 4);
+  const size   = parseInt(document.getElementById('ping-size').value) || 64;
+  const out    = document.getElementById('ping-output');
+  const ttl    = randInt(52, 64);
+
+  out.innerHTML = `<span class="info">PING ${target} (${fakeIP(target)}) ${size}(${size + 28}) bytes of data.\n</span>`;
+
+  let times = [];
+  let lost  = 0;
+
+  for (let i = 1; i <= count; i++) {
+    await sleep(randInt(300, 600));
+    const drop = Math.random() < 0.05;
+    if (drop) {
+      out.innerHTML += `<span class="warn">Request timeout for icmp_seq ${i}\n</span>`;
+      lost++;
+    } else {
+      const ms = parseFloat(randFloat(8, 48));
+      times.push(ms);
+      out.innerHTML += `<span class="good">${size + 28} bytes from ${fakeIP(target)}: icmp_seq=${i} ttl=${ttl} time=${ms} ms\n</span>`;
+    }
+    out.scrollTop = out.scrollHeight;
+  }
+
+  await sleep(300);
+  const loss = Math.round((lost / count) * 100);
+  const min  = times.length ? Math.min(...times).toFixed(3) : '—';
+  const max  = times.length ? Math.max(...times).toFixed(3) : '—';
+  const avg  = times.length ? (times.reduce((a,b)=>a+b,0)/times.length).toFixed(3) : '—';
+
+  out.innerHTML += `\n<span class="dim">--- ${target} ping statistics ---\n${count} packets transmitted, ${count-lost} received, ${loss}% packet loss\nrtt min/avg/max = ${min}/${avg}/${max} ms</span>`;
+  pinging = false;
+}
+
+function fakeIP(host) {
+  const map = {
+    '8.8.8.8':'8.8.8.8', '1.1.1.1':'1.1.1.1',
+    'google.com':'142.250.182.14', 'facebook.com':'157.240.192.35',
+    'github.com':'140.82.112.4', 'cloudflare.com':'104.16.123.96',
+  };
+  return map[host] || `${randInt(1,254)}.${randInt(0,255)}.${randInt(0,255)}.${randInt(1,254)}`;
+}
+
+function clearPing() {
+  document.getElementById('ping-output').innerHTML = '<span style="color:#555">// Output will appear here</span>';
+}
+
+// Traceroute
+let tracing = false;
+const TRACE_HOPS = [
+  ['192.168.1.1',    'local-router.home'],
+  ['10.10.0.1',      'isp-edge-01'],
+  ['203.0.113.5',    'isp-backbone-a'],
+  ['203.0.113.18',   'isp-backbone-b'],
+  ['72.14.194.1',    'google-peering'],
+  ['108.170.252.1',  'google-backbone-1'],
+  ['108.170.235.1',  'google-backbone-2'],
+  ['142.250.214.1',  'google-core-1'],
+  ['142.250.182.14', 'destination'],
+];
+
+async function runTrace() {
+  if (tracing) return;
+  tracing = true;
+  const target = document.getElementById('trace-target').value.trim() || 'google.com';
+  const maxH   = Math.min(30, parseInt(document.getElementById('trace-hops').value) || 15);
+  const out    = document.getElementById('trace-output');
+  out.innerHTML = `<span style="color:#74c7ec">traceroute to ${target} (${fakeIP(target)}), ${maxH} hops max, 60 byte packets\n</span>`;
+
+  const hops = TRACE_HOPS.slice(0, Math.min(maxH, TRACE_HOPS.length));
+
+  for (let i = 0; i < hops.length; i++) {
+    await sleep(randInt(250, 500));
+    const hop  = hops[i];
+    const ms1  = randFloat(1, 40);
+    const ms2  = randFloat(parseFloat(ms1), parseFloat(ms1) + 5);
+    const ms3  = randFloat(parseFloat(ms2), parseFloat(ms2) + 5);
+    const star = Math.random() < 0.08 ? '*' : ms3 + ' ms';
+    out.innerHTML += `<span style="color:#c9d1d9"> ${String(i+1).padStart(2)}  ${hop[0].padEnd(18)} (${hop[1].padEnd(22)})  ${ms1} ms  ${ms2} ms  ${star}\n</span>`;
+    out.scrollTop = out.scrollHeight;
+  }
+
+  out.innerHTML += `\n<span style="color:#555">Trace complete.</span>`;
+  tracing = false;
+}
+
+function clearTrace() {
+  document.getElementById('trace-output').innerHTML = '<span style="color:#555">// Output will appear here</span>';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── Port Reference ───
+const PORTS_DATA = [
+  {port:20,  name:'FTP-Data',      transport:'TCP',  layer:'Application',  desc:'FTP file transfer data channel',                     risk:'Medium'},
+  {port:21,  name:'FTP',           transport:'TCP',  layer:'Application',  desc:'File Transfer Protocol — control channel',           risk:'High'},
+  {port:22,  name:'SSH',           transport:'TCP',  layer:'Application',  desc:'Secure Shell — encrypted remote access',             risk:'Medium'},
+  {port:23,  name:'Telnet',        transport:'TCP',  layer:'Application',  desc:'Unencrypted remote terminal — DO NOT use in production', risk:'High'},
+  {port:25,  name:'SMTP',          transport:'TCP',  layer:'Application',  desc:'Simple Mail Transfer Protocol — sending email',      risk:'Medium'},
+  {port:53,  name:'DNS',           transport:'Both', layer:'Application',  desc:'Domain Name System — hostname resolution',           risk:'Low'},
+  {port:67,  name:'DHCP-Server',   transport:'UDP',  layer:'Application',  desc:'Dynamic Host Config — assigns IP addresses to clients', risk:'Low'},
+  {port:68,  name:'DHCP-Client',   transport:'UDP',  layer:'Application',  desc:'DHCP client port — receives IP from server',         risk:'Low'},
+  {port:69,  name:'TFTP',          transport:'UDP',  layer:'Application',  desc:'Trivial File Transfer Protocol — no auth, no encryption', risk:'High'},
+  {port:80,  name:'HTTP',          transport:'TCP',  layer:'Application',  desc:'HyperText Transfer Protocol — unencrypted web traffic', risk:'Low'},
+  {port:110, name:'POP3',          transport:'TCP',  layer:'Application',  desc:'Post Office Protocol — email retrieval',             risk:'Medium'},
+  {port:119, name:'NNTP',          transport:'TCP',  layer:'Application',  desc:'Network News Transfer Protocol',                    risk:'Low'},
+  {port:123, name:'NTP',           transport:'UDP',  layer:'Application',  desc:'Network Time Protocol — clock synchronization',     risk:'Low'},
+  {port:135, name:'MS-RPC',        transport:'TCP',  layer:'Application',  desc:'Microsoft RPC endpoint mapper — common attack target', risk:'High'},
+  {port:137, name:'NetBIOS-NS',    transport:'UDP',  layer:'Application',  desc:'NetBIOS Name Service — Windows name resolution',    risk:'High'},
+  {port:139, name:'NetBIOS-SSN',   transport:'TCP',  layer:'Session',      desc:'NetBIOS Session Service — Windows file sharing',    risk:'High'},
+  {port:143, name:'IMAP',          transport:'TCP',  layer:'Application',  desc:'Internet Message Access Protocol — email access',   risk:'Medium'},
+  {port:161, name:'SNMP',          transport:'UDP',  layer:'Application',  desc:'Simple Network Management Protocol — device monitoring', risk:'High'},
+  {port:194, name:'IRC',           transport:'TCP',  layer:'Application',  desc:'Internet Relay Chat protocol',                     risk:'Medium'},
+  {port:389, name:'LDAP',          transport:'TCP',  layer:'Application',  desc:'Lightweight Directory Access Protocol',             risk:'Medium'},
+  {port:443, name:'HTTPS',         transport:'TCP',  layer:'Application',  desc:'HTTP over TLS/SSL — encrypted web traffic',         risk:'Low'},
+  {port:445, name:'SMB',           transport:'TCP',  layer:'Application',  desc:'Server Message Block — Windows file sharing (WannaCry)', risk:'High'},
+  {port:465, name:'SMTPS',         transport:'TCP',  layer:'Application',  desc:'SMTP over SSL — encrypted email sending',           risk:'Low'},
+  {port:514, name:'Syslog',        transport:'UDP',  layer:'Application',  desc:'System logging protocol — log aggregation',         risk:'Low'},
+  {port:993, name:'IMAPS',         transport:'TCP',  layer:'Application',  desc:'IMAP over SSL — encrypted email access',            risk:'Low'},
+  {port:995, name:'POP3S',         transport:'TCP',  layer:'Application',  desc:'POP3 over SSL — encrypted email retrieval',         risk:'Low'},
+  {port:1433,name:'MSSQL',         transport:'TCP',  layer:'Application',  desc:'Microsoft SQL Server — database access',            risk:'High'},
+  {port:1521,name:'Oracle-DB',     transport:'TCP',  layer:'Application',  desc:'Oracle Database listener',                         risk:'High'},
+  {port:3306,name:'MySQL',         transport:'TCP',  layer:'Application',  desc:'MySQL/MariaDB database — often exposed accidentally', risk:'High'},
+  {port:3389,name:'RDP',           transport:'TCP',  layer:'Application',  desc:'Remote Desktop Protocol — BlueKeep vulnerability',  risk:'High'},
+  {port:5432,name:'PostgreSQL',    transport:'TCP',  layer:'Application',  desc:'PostgreSQL database server',                       risk:'Medium'},
+  {port:5900,name:'VNC',           transport:'TCP',  layer:'Application',  desc:'Virtual Network Computing — remote desktop',        risk:'High'},
+  {port:6379,name:'Redis',         transport:'TCP',  layer:'Application',  desc:'Redis in-memory database — often runs unauthenticated', risk:'High'},
+  {port:8080,name:'HTTP-Alt',      transport:'TCP',  layer:'Application',  desc:'Alternate HTTP port — proxy, web apps, dev servers', risk:'Medium'},
+  {port:8443,name:'HTTPS-Alt',     transport:'TCP',  layer:'Application',  desc:'Alternate HTTPS port',                             risk:'Low'},
+  {port:27017,name:'MongoDB',      transport:'TCP',  layer:'Application',  desc:'MongoDB database — famously left open to internet', risk:'High'},
+];
+
+const RISK_COLORS = { High: 'badge-red', Medium: 'badge-amber', Low: 'badge-green' };
+
+function renderPorts(data) {
+  const tbody = document.getElementById('ports-tbody');
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td><span class="port-num">${p.port}</span></td>
+      <td style="font-weight:500">${p.name}</td>
+      <td><span class="badge ${p.transport === 'TCP' ? 'badge-blue' : p.transport === 'UDP' ? 'badge-amber' : 'badge-gray'}">${p.transport}</span></td>
+      <td style="color:var(--text2);font-size:12px">${p.layer}</td>
+      <td style="color:var(--text2);font-size:12px">${p.desc}</td>
+      <td><span class="badge ${RISK_COLORS[p.risk]}">${p.risk}</span></td>
+    </tr>`).join('');
+}
+
+function filterPorts() {
+  const q     = document.getElementById('port-search').value.toLowerCase();
+  const proto = document.getElementById('proto-type-filter').value;
+  const risk  = document.getElementById('risk-filter').value;
+  const filtered = PORTS_DATA.filter(p => {
+    const matchQ = !q || p.port.toString().includes(q) || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+    const matchP = !proto || p.transport === proto || p.transport === 'Both';
+    const matchR = !risk || p.risk === risk;
+    return matchQ && matchP && matchR;
+  });
+  renderPorts(filtered);
+}
+
+renderPorts(PORTS_DATA);
+</script>
+</body>
+</html>
